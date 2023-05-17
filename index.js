@@ -25,6 +25,28 @@ async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
+
+    // collection
+    const productCollection = client.db("emaJhonDB").collection("products");
+
+    app.get("/products", async (req, res) => {
+      // console.log(req.query);
+      const page = parseInt(req.query.page) || 0;
+      const limit = parseInt(req.query.limit) || 10;
+      const skip = page * limit;
+      const result = await productCollection
+        .find()
+        .skip(skip)
+        .limit(limit)
+        .toArray();
+      res.send(result);
+    });
+
+    app.get("/totalProducts", async (req, res) => {
+      const result = await productCollection.estimatedDocumentCount();
+      res.send({ totalProducts: result });
+    });
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
